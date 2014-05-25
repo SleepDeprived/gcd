@@ -1,9 +1,6 @@
 # download.file("https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip", destfile="gcdFUCI_dataset.zip", method="curl")
 library(plyr)
-
-setwd("/Users/tm/code_for_courses/getting_cleaning_data/gcd_project/")
-
-
+library(reshape2)
 
 columns <- read.table("./UCI HAR Dataset/activity_labels.txt", header = FALSE)
 
@@ -22,5 +19,13 @@ colnames(train)[1:2] <- c("subject","activity")
 
 data <- rbind(test, train)
 
-m <- colMeans(data[,3:563], )
-dev <- apply(data[,3:563], MARGIN = 1, sd)
+measurementMean <- rowMeans(data[,3:563], )
+stdDev <- apply(data[,3:563], MARGIN = 1, sd)
+activity <- factor(as.character(data$activity), labels = columns$V2)
+
+allSubjectActivity <- data.frame(data$subject, activity, measurementMean, stdDev)
+colnames(allSubjectActivity)[1] <- "subject"
+
+m <- melt(allSubjectActivity, id = c("subject", "activity"), measure = c("measurementMean"))
+
+tidyDataSet <- dcast(m, subject + activity ~ variable, mean)
