@@ -7,8 +7,7 @@ runPeerAnalysis <- function(){
   measurementData <- loadCombineData()
 
   subjectActivity <- extractMeanSd(measurementData)
-  browser()
-  m <- melt(subjectActivity, id = c("subject", "activity"), measure = c("measurementMean"))
+  m <- melt(subjectActivity, id = c("subject", "activity"), measure = colnames(subjectActivity)[3:length(colnames(subjectActivity))])
   tidyDataSet <- dcast(m, subject + activity ~ variable, mean)
 
   write.table(tidyDataSet, file = "gcd_peer_tidy_data.txt", sep = "\t")
@@ -35,7 +34,7 @@ loadCombineData <- function(){
 }
 
 extractMeanSd <- function(data) {
-  temp <-  data[,grep("mean()|std()", colnames(data))]
+  meanStdCols <- grep("mean()|std()", colnames(data))
+  temp <-  data[,c(1, 2, meanStdCols)]
   meanStdData <- temp[,grep("meanFreq()", colnames(temp))*-1]
-  measurementMean <- rowMeans(data[,3:563], )
 }
