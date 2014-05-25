@@ -7,7 +7,7 @@ runPeerAnalysis <- function(){
   measurementData <- loadCombineData()
 
   subjectActivity <- extractMeanSd(measurementData)
-
+  browser()
   m <- melt(subjectActivity, id = c("subject", "activity"), measure = c("measurementMean"))
   tidyDataSet <- dcast(m, subject + activity ~ variable, mean)
 
@@ -15,7 +15,7 @@ runPeerAnalysis <- function(){
 }
 
 loadCombineData <- function(){
-  
+  features <- read.table("./UCI HAR Dataset/features.txt", header = FALSE, stringsAsFactors = FALSE)
   xtest <- read.table("./UCI HAR Dataset/test/X_test.txt", header = FALSE)
   ytest <- read.table("./UCI HAR Dataset/test/y_test.txt", header = FALSE)
   subjectTest <- read.table("./UCI HAR Dataset/test/subject_test.txt", header = FALSE)
@@ -30,15 +30,12 @@ loadCombineData <- function(){
   colnames(train)[1:2] <- c("subject","activity")
   
   data <- rbind(test, train)
+  colnames(data)[3:563] <- features[,2]
+  data
 }
 
 extractMeanSd <- function(data) {
+  temp <-  data[,grep("mean()|std()", colnames(data))]
+  meanStdData <- temp[,grep("meanFreq()", colnames(temp))*-1]
   measurementMean <- rowMeans(data[,3:563], )
-  stdDev <- apply(data[,3:563], MARGIN = 1, sd)
-  columns <- read.table("./UCI HAR Dataset/activity_labels.txt", header = FALSE)
-  activity <- factor(as.character(data$activity), labels = columns$V2)
-  
-  allSubjectActivity <- data.frame(data$subject, activity, measurementMean, stdDev)
-  colnames(allSubjectActivity)[1] <- "subject"
-  allSubjectActivity
 }
